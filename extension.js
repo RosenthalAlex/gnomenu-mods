@@ -3,6 +3,7 @@
 import Clutter from 'gi://Clutter';
 import Atk from 'gi://Atk';
 import Gio from 'gi://Gio';
+import Meta from 'gi://Meta';
 import GLib from 'gi://GLib';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
@@ -15,6 +16,13 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {GMenuSource} from './gmenuSource.js';
 import {FilesDesktopSource} from './filesDesktopSource.js';
 import {sourceForWindow} from './windowSource.js';
+
+// The desktop is drawn in a window by desktop icon extensions (e.g. DING): focusing it means
+// being on the desktop, like having no window focused.
+function isDesktopWindow(window) {
+    return Boolean(window) && (window.get_window_type() === Meta.WindowType.DESKTOP ||
+        Boolean(window.customJS_ding) || window.get_gtk_application_id?.() === 'com.rastersoft.ding');
+}
 
 function label(text) {
     return text.replace(/__|_/g, match => match === '__' ? '_' : '').slice(0, 200);
@@ -117,13 +125,14 @@ export default class GnoMenu extends Extension {
     _syncFocus() {
         if (!this._enabled)
             return;
-        const window = global.display.focus_window;
+        const focus = global.display.focus_window;
+        const window = isDesktopWindow(focus) ? null : focus;
         // A Shell popup can temporarily take keyboard focus away from its client.
         if (!window && (this._rendering || this._buttons.some(button => button.menu.isOpen)))
             return;
         this._focusedWindow = window && !this._unmanagedWindows.has(window) ? window : null;
         const windows = global.get_window_actors().map(actor => actor.meta_window)
-            .filter(candidate => !this._unmanagedWindows.has(candidate));
+            .filter(candidate => !this._unmanagedWindows.has(candidate) && !isDesktopWindow(candidate));
         const files = windows.filter(candidate => candidate.get_gtk_application_id() === 'org.gnome.Nautilus');
         if (files.includes(window))
             this._lastFilesWindow = window;

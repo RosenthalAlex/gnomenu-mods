@@ -8,6 +8,9 @@ change here is the supported version in `metadata.json`. Tested on GNOME Shell 5
 its full menus, other apps their exported menus or a partial menu, and the extension disables and
 re-enables cleanly.
 
+Also, clicking the desktop of a desktop icons extension (such as DING) shows the Files menus, as
+when no window is focused, instead of the desktop window's internal name.
+
 ## Installation
 
 ```bash
