@@ -1,0 +1,9 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+.gnomenu-button {
+    -minimum-hpadding: 6px;
+    -natural-hpadding: 10px;
+}
+
+.gnomenu-application-button {
+    font-weight: bold;
+}
